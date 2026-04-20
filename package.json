@@ -1,0 +1,14 @@
+{
+  "name": "agentic-risk-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node server.js",
+    "check:syntax": "node scripts/syntax-check.js",
+    "test": "node --test tests/unit/**/*.test.js"
+  }
+}
