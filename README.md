@@ -11,7 +11,7 @@ The design constraint is deliberate:
 This repo therefore supports two runtime modes:
 
 - `mock`: fully local development and tests with deterministic sample outputs
-- `remote`: local UI and agent runtime call a hosted gateway API
+- `remote`: the Vercel-hosted API routes call Compass server-side using environment variables
 
 ## Why a separate repo
 
@@ -48,23 +48,21 @@ npm run check:syntax
 
 ## Remote mode
 
-Set these environment variables when you are ready to use a hosted gateway:
+Set these environment variables when you are ready to use live AI inside Vercel:
 
 ```bash
 AGENT_API_MODE=remote
-REMOTE_API_BASE_URL=https://your-gateway.vercel.app
-REMOTE_API_TOKEN=optional-shared-token
-REMOTE_API_TIMEOUT_MS=30000
+COMPASS_API_KEY=your-secret
+COMPASS_MODEL=gpt-5.1
 ```
 
-Expected remote gateway endpoints:
+Optional variables:
 
-- `GET /api/health`
-- `POST /api/agent/draft`
-- `POST /api/agent/challenge`
+- `COMPASS_API_URL`
+- `REMOTE_API_TIMEOUT_MS`
 
-That gateway is where Compass-facing logic should live. The browser and local Node process should only ever talk to the gateway.
+The browser still only talks to this app's own `/api/*` endpoints. Compass-facing logic stays inside Vercel serverless functions.
 
 ## Recommended next step
 
-Build the hosted gateway on Vercel first, then swap this repo from `mock` to `remote`. The UI and agent loop already separate orchestration from model access, which is the important boundary.
+Deploy this repo to Vercel, add the Compass environment variables there, then switch from `mock` to `remote`. The UI and agent loop already separate orchestration from model access, which is the important boundary.
