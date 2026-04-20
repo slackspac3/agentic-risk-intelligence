@@ -6,43 +6,11 @@ const http = require('node:http');
 const { URL } = require('node:url');
 
 const { getConfig } = require('./lib/config');
+const { readJsonBody, writeJson } = require('./lib/http');
 const { runAssessmentAgent } = require('./lib/assessmentAgent');
 
 const config = getConfig();
 const publicRoot = path.join(__dirname, 'public');
-
-function writeJson(res, statusCode, payload) {
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store'
-  });
-  res.end(JSON.stringify(payload, null, 2));
-}
-
-function readRequestBody(req) {
-  return new Promise((resolve, reject) => {
-    let raw = '';
-    req.setEncoding('utf8');
-    req.on('data', (chunk) => {
-      raw += chunk;
-      if (raw.length > 2_000_000) {
-        reject(new Error('Request body too large.'));
-      }
-    });
-    req.on('end', () => {
-      if (!raw.trim()) {
-        resolve({});
-        return;
-      }
-      try {
-        resolve(JSON.parse(raw));
-      } catch {
-        reject(new Error('Invalid JSON body.'));
-      }
-    });
-    req.on('error', reject);
-  });
-}
 
 function getContentType(filePath) {
   if (filePath.endsWith('.html')) return 'text/html; charset=utf-8';
@@ -100,7 +68,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && url.pathname === '/api/agent/run') {
-      const body = await readRequestBody(req);
+      const body = await readJsonBody(req);
       const result = await runAssessmentAgent(body);
       writeJson(res, result.ok ? 200 : 400, result);
       return;
